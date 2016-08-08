@@ -15,33 +15,82 @@
 (function () {
     "use strict";
 
-    var canvas:HTMLElement;
-    var stage:createjs.Stage;
-    var helloLabel:objects.Label;
+    var canvas: HTMLElement;
+    var CANVAS_WIDTH: number = window.innerWidth;
+    var CANVAS_HEIGHT: number = window.innerHeight;
+    var stage: createjs.Stage;
+    var helloLabel: objects.Label;
+    var yDirection: number = 1;
+    var xDirection: number = 1;
+    var dy: number = 1;
+    var dx: number = 1;
 
     // app entry function
-    function init():void {
-
+    function init(): void {
         canvas = document.getElementById("canvas");
+        canvas.setAttribute("width",CANVAS_WIDTH.toString());
+        canvas.setAttribute("height", CANVAS_HEIGHT.toString());
+
         stage = new createjs.Stage(canvas);
         createjs.Ticker.framerate = 60; // 60 frames per second
         createjs.Ticker.on("tick", gameLoop); // call gameLoop every frame
         main();
     }
 
-    function gameLoop():void {
+    function resize():void {
+        var CANVAS_WIDTH: number = window.innerWidth;
+        var CANVAS_HEIGHT: number = window.innerHeight;
+        helloLabel.x = CANVAS_WIDTH * 0.5;
+        helloLabel.y = CANVAS_HEIGHT * 0.5;
+    }
+
+    function checkBounds(axis: number, boundary: number): number {
+        if (axis >= boundary) {
+            axis = boundary;
+        }
+        if (axis <= 0) {
+            axis = 0;
+        }
+        return axis;
+    }
+
+    function gameLoop(): void {
+
         helloLabel.rotation += 5;
+
+        // checkbounds for x and y
+        helloLabel.x = checkBounds(helloLabel.x, CANVAS_WIDTH);
+        helloLabel.y = checkBounds(helloLabel.y, CANVAS_HEIGHT);
+
+        // change direction and speed for x and y
+        if ((helloLabel.y == CANVAS_HEIGHT) || (helloLabel.y == 0)) {
+            dy = Math.floor(Math.random() * 5) + 1;
+            yDirection *= -1;
+        }
+
+        if ((helloLabel.x == CANVAS_WIDTH) || (helloLabel.x == 0)) {
+            dx = Math.floor(Math.random() * 5) + 1;
+            xDirection *= -1;
+        }
+
+        helloLabel.y += (yDirection * dy);
+        helloLabel.x += (xDirection * dx);
+
+
         stage.update(); // refresh the stage container
     }
 
 
-    function main():void {
-        helloLabel = new objects.Label("Hello World!", "40px Consolas","#000000", 160, 160, true);
+    function main(): void {
+        helloLabel = new objects.Label("Hello World!", "40px Consolas", "#000000", 
+        CANVAS_WIDTH * 0.5, CANVAS_HEIGHT * 0.5, true);
         stage.addChild(helloLabel);
     }
 
     // call init funciton when window finishes loading
     window.addEventListener("load", init);
+
+    window.addEventListener("resize", resize);
 
 
 })();
